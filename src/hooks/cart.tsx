@@ -44,13 +44,13 @@ const CartProvider: React.FC = ({ children }) => {
     async ({ id, title, image_url, price }: Omit<Product, 'quantity'>) => {
       const productExists = products.find(prod => prod.id === id);
 
+      let cardProducts = [];
+
       if (productExists) {
-        setProducts(
-          products.map(product =>
-            product.id === id
-              ? { ...product, quantity: product.quantity + 1 }
-              : product,
-          ),
+        cardProducts = products.map(product =>
+          product.id === id
+            ? { ...product, quantity: product.quantity + 1 }
+            : product,
         );
       } else {
         const newProduct = {
@@ -60,12 +60,15 @@ const CartProvider: React.FC = ({ children }) => {
           price,
           quantity: 1,
         };
-        setProducts([...products, newProduct]);
+
+        cardProducts = [...products, newProduct];
       }
+
+      setProducts(cardProducts);
 
       await AsyncStorage.setItem(
         '@GoMarketplace:Cart',
-        JSON.stringify(products),
+        JSON.stringify(cardProducts),
       );
     },
     [products],
@@ -73,17 +76,17 @@ const CartProvider: React.FC = ({ children }) => {
 
   const increment = useCallback(
     async id => {
-      setProducts(
-        products.map(product =>
-          product.id === id
-            ? { ...product, quantity: product.quantity + 1 }
-            : product,
-        ),
+      const newProducts = products.map(product =>
+        product.id === id
+          ? { ...product, quantity: product.quantity + 1 }
+          : product,
       );
+
+      setProducts(newProducts);
 
       await AsyncStorage.setItem(
         '@GoMarketplace:Cart',
-        JSON.stringify(products),
+        JSON.stringify(newProducts),
       );
     },
     [products],
@@ -91,21 +94,21 @@ const CartProvider: React.FC = ({ children }) => {
 
   const decrement = useCallback(
     async id => {
-      setProducts(
-        products.map(product => {
-          if (product.id === id) {
-            return {
-              ...product,
-              quantity: product.quantity > 1 ? product.quantity - 1 : 1,
-            };
-          }
-          return product;
-        }),
-      );
+      const newProducts = products.map(product => {
+        if (product.id === id) {
+          return {
+            ...product,
+            quantity: product.quantity > 1 ? product.quantity - 1 : 1,
+          };
+        }
+        return product;
+      });
+
+      setProducts(newProducts);
 
       await AsyncStorage.setItem(
         '@GoMarketplace:Cart',
-        JSON.stringify(products),
+        JSON.stringify(newProducts),
       );
     },
     [products],
